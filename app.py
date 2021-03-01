@@ -10,8 +10,8 @@ from shapely import wkt
 
 ########### Define your variables
 #df = pd.read_csv(r'https://raw.githubusercontent.com/kkane2425/energy-dash2/master/data/gdf_poly_shape.csv?token=AOCD35OIII2LZCPVXEOZQCTAHL2PG')
-df = pd.read_csv(r'https://raw.githubusercontent.com/kkane2425/energy-dash2/master/data/gdf_poly_shape.csv')
-#df = pd.read_csv('./data/gdf_poly_shape.csv')
+#df = pd.read_csv(r'https://raw.githubusercontent.com/kkane2425/energy-dash2/master/data/gdf_poly_shape.csv')
+df = pd.read_csv('./data/gdf_poly_shape.csv')
 df['geometry'] = df['str_geom'].apply(wkt.loads)
 gdf = gpd.GeoDataFrame(df, geometry='geometry').set_index('loc_id')
 gdf.set_crs('EPSG:3395', inplace=True)
