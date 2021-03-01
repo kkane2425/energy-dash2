@@ -82,7 +82,8 @@ app.layout = html.Div(children=[
     html.H1('Enginuity Annual Savings'),
     dcc.Graph(
         id='graph',
-        figure=energy_fig
+        figure=energy_fig,
+        style={'width': '90vh', 'height': '90vh'}
     ),
     #html.A('Code on Github', href=githublink),
     #html.Br(),
