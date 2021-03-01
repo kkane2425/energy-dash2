@@ -45,7 +45,7 @@ fig_layout= go.Layout(title_text='Enginuity savings',
                    title_x=0.5,
                    width=1000,
                    height=1000,
-                   margin=dict(l=20, r=20, t=20, b=20),
+                   margin=dict(l=2, r=2, t=2, b=2),
                    paper_bgcolor="LightSteelBlue")
 
 
