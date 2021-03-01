@@ -44,7 +44,9 @@ fig_data = px.choropleth(geo_df,
 fig_layout= go.Layout(title_text='Enginuity savings',
                    title_x=0.5,
                    width=1000,
-                   height=1000)
+                   height=1000,
+                   margin=dict(l=20, r=20, t=20, b=20),
+                   paper_bgcolor="LightSteelBlue")
 
 
 #figure.update_layout(transition_duration=500)
