@@ -85,7 +85,7 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='graph',
         figure=energy_fig,
-        style={'width': '100vh', 'height': '60vh'}
+        style={'width': '95vh', 'height': '45vh'}
     ),
     #html.A('Code on Github', href=githublink),
     #html.Br(),
