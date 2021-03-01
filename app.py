@@ -51,7 +51,6 @@ fig_layout= go.Layout(title_text='Enginuity savings',
 
 
 energy_fig = go.Figure(data=fig_data, layout=fig_layout)
-energy_fig.update_geos(fitbounds="locations", visible=False)
 
 energy_fig.update_traces(
     hovertemplate="<br>".join([
@@ -65,6 +64,8 @@ energy_fig.update_traces(
         "Percent ON: %{customdata[8]:%.0f}",
     ])
 )
+energy_fig.update_geos(fitbounds="locations", visible=False)
+
 
 ########### Initiate the app
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
