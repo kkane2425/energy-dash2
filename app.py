@@ -14,7 +14,7 @@ df = pd.read_csv("https://github.com/kkane2425/energy-dash2/blob/master/data/gdf
 df['geometry'] = df['str_geom'].apply(wkt.loads)
 geo_df = gpd.GeoDataFrame(df, geometry='geometry').set_index('loc_id')
 geo_df.set_crs('EPSG:4326', inplace=True)
-geo_df = gdf.to_crs('EPSG:4326')
+geo_df = geo_df.to_crs('EPSG:4326')
 
 fig_data = px.choropleth(geo_df,
                    geojson=geo_df.geometry,
