@@ -45,7 +45,6 @@ fig_layout= go.Layout(title_text='Enginuity savings',
                    height=500)
 
 
-#figure.update_layout(transition_duration=500)
 
 
 energy_fig = go.Figure(data=fig_data, layout=fig_layout)
@@ -68,6 +67,9 @@ energy_fig.update_traces(
         "Percent ON: %{customdata[8]:%.0f}",
     ])
 )
+
+energy_fig.update_layout(transition_duration=500)
+
 
 ########### Initiate the app
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
