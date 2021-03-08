@@ -9,14 +9,12 @@ import geopandas as gpd
 from shapely import wkt
 
 ########### Define your variables
-#df = pd.read_csv(r'https://raw.githubusercontent.com/kkane2425/energy-dash2/master/data/gdf_poly_shape.csv')
 df = pd.read_csv("https://github.com/kkane2425/energy-dash2/blob/master/data/gdf_poly_shape.csv?raw=true")
-#df = pd.read_csv('./data/gdf_poly_shape.csv')
-df['geometry'] = df['str_geom'].apply(wkt.loads)
-gdf = gpd.GeoDataFrame(df, geometry='geometry').set_index('loc_id')
-gdf.set_crs('EPSG:3395', inplace=True)
-geo_df = gdf.to_crs('EPSG:4326')
 
+df['geometry'] = df['str_geom'].apply(wkt.loads)
+geo_df = gpd.GeoDataFrame(df, geometry='geometry').set_index('loc_id')
+geo_df.set_crs('EPSG:4326', inplace=True)
+geo_df = gdf.to_crs('EPSG:4326')
 
 fig_data = px.choropleth(geo_df,
                    geojson=geo_df.geometry,
@@ -44,15 +42,19 @@ fig_data = px.choropleth(geo_df,
 fig_layout= go.Layout(title_text='Enginuity savings',
                    title_x=0.5,
                    width=1000,
-                   height=1000,
-                   margin=dict(l=2, r=2, t=2, b=2),
-                   paper_bgcolor="LightSteelBlue")
+                   height=500)
 
 
 #figure.update_layout(transition_duration=500)
 
 
 energy_fig = go.Figure(data=fig_data, layout=fig_layout)
+energy_fig.update_geos(#fitbounds="locations", 
+                    visible=False,
+                        # center=dict(lon=95, lat=30),
+                    lataxis_range=[25,50], 
+                    lonaxis_range=[-125, -65]
+            )
 
 energy_fig.update_traces(
     hovertemplate="<br>".join([
@@ -66,8 +68,6 @@ energy_fig.update_traces(
         "Percent ON: %{customdata[8]:%.0f}",
     ])
 )
-energy_fig.update_geos(fitbounds="locations", visible=False)
-
 
 ########### Initiate the app
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
