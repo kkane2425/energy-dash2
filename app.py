@@ -159,14 +159,16 @@ def update_graph(xaxis_column_name, yaxis_column_name,
         xaxis = 'x2',
         marker = dict(
             color = 'rgba(0,0,0,1)'
-        )
+        ),
+        hovertemplate ='<i>Bin-range</i>:' + '%{y}' + '<br><i>N=</i>' + '%{x}' + '<extra></extra>'
         ))
     fig.add_trace(go.Histogram(
         x = dff[xaxis_column_name],
         yaxis = 'y2',
         marker = dict(
             color = 'rgba(0,0,0,1)'
-        )
+        ),
+        hovertemplate ='<i>Bin-range</i>:' + '%{x}' + '<br><i>N=</i>' + '%{y}' + '<extra></extra>'
         ))
 
     fig.update_traces(customdata=dff['loc_name'])
