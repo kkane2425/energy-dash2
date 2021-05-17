@@ -214,7 +214,7 @@ def create_us_map(gdff, xaxis_column_name):
                    locations=gdff.index,
                    #color="TOTAL_SAVINGS",
                    color=xaxis_column_name,
-                   color_continuous_scale="viridis",
+                   color_continuous_scale="turbo_r",
                    range_color=(gdff[xaxis_column_name].quantile(0.05), gdff[xaxis_column_name].quantile(0.95)),
                    #animation_frame='heat_kwh_max'  ,
                     custom_data=['loc_name','TOTAL_SAVINGS','NONENG_HEAT_KWH_COST', 'NONENG_ELEC_KWH_COST', 'heat_needed_cumulative', 'elec_needed_cumulative',       'Cycle_ON_cumulative','Elev', 'ON_PCT'],
