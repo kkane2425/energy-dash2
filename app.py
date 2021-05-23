@@ -36,12 +36,12 @@ available_indicators= ['TOTAL_SAVINGS', 'ON_PCT', 'Cycle_ON_cumulative', 'ON_HRS
 
 
 
-available_kwh=[10,16]
+available_kwh=[11.05]
 
 # initialize axes
 xaxis_column_name = 'TOTAL_SAVINGS'
 yaxis_column_name = 'Cycle_ON_cumulative'
-kwh_value = 10
+kwh_value = 11.05
 
 #app.layout = html.Div(dcc.Dropdown(options=[...]), className="dash-bootstrap")
 
