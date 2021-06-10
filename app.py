@@ -19,29 +19,54 @@ app.title="Enginuity"
 
 ########### Define your variables
 df = pd.read_csv("https://github.com/kkane2425/energy-dash2/blob/master/data/gdf_poly_shape.csv?raw=true")
-#df=geo_df
-df['geometry'] = df['str_geom'].apply(wkt.loads)
-geo_df = gpd.GeoDataFrame(df, geometry='geometry').set_index('loc_id')
-geo_df.set_crs('EPSG:4326', inplace=True)
-geo_df = geo_df.to_crs('EPSG:4326')
+def csv_to_gpd(indf):
+    indf['geometry'] = indf['str_geom'].apply(wkt.loads)
+    geo_df = gpd.GeoDataFrame(indf, geometry='geometry').set_index('loc_id')
+    geo_df.set_crs('EPSG:4326', inplace=True)
+    return geo_df.to_crs('EPSG:4326')
+    
+geo_df = csv_to_gpd(df)
 
 #available_indicators = df['Indicator Name'].unique()
-available_indicators= ['TOTAL_SAVINGS', 'ON_PCT', 'Cycle_ON_cumulative', 'ON_HRS_cumulative',
-    'heat_needed_cumulative','elec_needed_cumulative', 'heat_produced_cumulative',
-    'elec_produced_cumulative', 'unmet_heat_needed_cumulative',
-    'unmet_elec_needed_cumulative', 'wasted_heat_cumulative',
-    'Elev',
-    'ENG_ELEC_KWH_COST', 'ENG_HEAT_KWH_COST', 'NONENG_HEAT_KWH_COST','NONENG_ELEC_KWH_COST', 
-    'heat_kwh_min', 'heat_kwh_max', 'elec_kwh_max', 'water_heater_max_kwh']
+available_indicators= ['TOTAL_SAVINGS', 'ON_PCT',
+                       'ENG_ELEC_KWH_COST', 'NONENG_HEAT_KWH_COST', 'NONENG_ELEC_KWH_COST',
+       'heat_kwh_min', 'heat_kwh_max', 'elec_kwh_max', 'battery_max_kwh',
+       'water_heater_max_kwh', 'heat_needed_cumulative',
+       'elec_needed_cumulative', 'heat_produced_cumulative',
+       'produced_free_heat_cumulative', 'produced_notfree_heat_cumulative',
+       'elec_produced_cumulative', 'unmet_heat_needed_cumulative',
+       'unmet_elec_needed_cumulative', 'ending_stored_heat_cumulative',
+       'ending_stored_elec_cumulative', 'wasted_heat_cumulative',
+       'excess_heat_cumulative', 'excess_elec_cumulative',
+       'ENG_cost_cumulative', 'savings_cumulative',
+       'future_heat_savings_cumulative', 'future_elec_savings_cumulative',
+       'recycled_heat_savings_cumulative', 'recycled_elec_savings_cumulative',
+       'ON_HRS_cumulative', 'inc_needed_heat_kwh_cumulative',
+       'market_cost_cumulative',
+       'Cycle_ON_cumulative'   ]
 
 
 
-available_kwh=[11.05]
+EV_flag_values=[0,1]
+
+state_values = list(df.State_y.unique())
+state_values.sort()
+state_values.insert(0,'Cont.US')
 
 # initialize axes
 xaxis_column_name = 'TOTAL_SAVINGS'
 yaxis_column_name = 'Cycle_ON_cumulative'
-kwh_value = 11.05
+EV_flag = 0
+state_set = 'CT'
+
+def get_state_filter(indf, st_cd):
+    if st_cd == 'Cont.US': 
+        filter = indf['State_y']!=st_cd  # keep all
+    else:
+        filter = indf['State_y']==st_cd
+    return filter
+    
+    
 
 #app.layout = html.Div(dcc.Dropdown(options=[...]), className="dash-bootstrap")
 
@@ -56,7 +81,7 @@ app.layout = html.Div([
                 clearable=False,
             )
         ], 
-            style={'width': '32%', 'display': 'inline-block','color':'darkgray'}),
+            style={'width': '29%', 'display': 'inline-block','color':'darkgray'}),
 
         html.Div([
             dcc.Dropdown(
@@ -67,17 +92,29 @@ app.layout = html.Div([
 
             )
         ], 
-            style={'width': '32%', 'display': 'inline-block','color':'darkgray'}),
+             style={'width': '29%', 'display': 'inline-block','color':'darkgray'}),
+ 
+        html.Div([
+            dcc.Dropdown(
+                id='crossfilter-ST-column',
+                options=[{'label': i, 'value': i} for i in state_values],
+                value = state_set,
+                clearable=False,
+
+            )
+        ], 
+            style={'width': '29%', 'display': 'inline-block','color':'darkgray'}),
+ 
         
         html.Div([
             dcc.RadioItems(
-                id='crossfilter-kwh-type',
-                options=[{'label': 'max heat kwh='+str(i), 'value': i} for i in available_kwh],
-                value=available_kwh[0],
+                id='crossfilter-EV-flag',
+                options=[{'label': 'EV='+str(i), 'value': i} for i in EV_flag_values],
+                value=EV_flag_values[0],
                 labelStyle={'display': 'inline-block'}
             )
         ], 
-            style={'width': '32%', 'float': 'right', 'display': 'inline-block'}),
+            style={'width': '9%', 'float': 'right', 'display': 'inline-block'}),
 
 
     ], 
@@ -102,14 +139,6 @@ app.layout = html.Div([
             )
         ], style={'width': '45%','float': 'right', 'display': 'inline-block', 'padding': '5px 5px 5px 5px'}),        
 
-    #html.Div(dcc.Slider(
-    #    id='crossfilter-kwh--slider',
-    #    min=df['heat_kwh_max'].min(),
-    #    max=df['heat_kwh_max'].max(),
-    #    value=df['heat_kwh_max'].max(),
-    #    marks={str(kwh): str(kwh) for kwh in df['heat_kwh_max'].unique()},
-    #    step=None
-    #), style={'width': '49%', 'padding': '0px 20px 20px 20px'})
 ])
 
 
@@ -117,14 +146,15 @@ app.layout = html.Div([
     dash.dependencies.Output('crossfilter-indicator-scatter', 'figure'),
     [dash.dependencies.Input('xaxis-dropdown-component', 'value'),
      dash.dependencies.Input('crossfilter-yaxis-column', 'value'),
-     dash.dependencies.Input('crossfilter-kwh-type', 'value'),
+     dash.dependencies.Input('crossfilter-ST-column', 'value'),
+     dash.dependencies.Input('crossfilter-EV-flag', 'value'),
      #dash.dependencies.Input('crossfilter-yaxis-type', 'value'),
      #dash.dependencies.Input('crossfilter-kwh--slider', 'value')
     ])
 def update_graph(xaxis_column_name, yaxis_column_name,
                  #xaxis_type, yaxis_type,
-                 kwh_value):
-    dff = df[df['heat_kwh_max'] == kwh_value]
+                 st_cd, EV_flag):
+    dff = df[df['EV_flag'] == EV_flag & get_state_filter(df, st_cd)]
 
     fig = go.Figure()
     fig.add_trace(go.Histogram2dContour(
@@ -159,16 +189,14 @@ def update_graph(xaxis_column_name, yaxis_column_name,
         xaxis = 'x2',
         marker = dict(
             color = 'rgba(0,0,0,1)'
-        ),
-        hovertemplate ='<i>Bin-range</i>:' + '%{y}' + '<br><i>N=</i>' + '%{x}' + '<extra></extra>'
+        )
         ))
     fig.add_trace(go.Histogram(
         x = dff[xaxis_column_name],
         yaxis = 'y2',
         marker = dict(
             color = 'rgba(0,0,0,1)'
-        ),
-        hovertemplate ='<i>Bin-range</i>:' + '%{x}' + '<br><i>N=</i>' + '%{y}' + '<extra></extra>'
+        )
         ))
 
     fig.update_traces(customdata=dff['loc_name'])
@@ -233,8 +261,10 @@ def create_us_map(gdff, xaxis_column_name):
     energy_fig.update_geos(#fitbounds="locations", 
                         visible=False,
                             # center=dict(lon=95, lat=30),
-                        lataxis_range=[25,50], 
-                        lonaxis_range=[-125, -65]
+                        lataxis_range=[gdff['Latitude'].min(), gdff['Latitude'].max()],
+                        lonaxis_range=[gdff['Longitude'].min(), gdff['Longitude'].max()]
+                        #lataxis_range=[25,50], 
+                        #lonaxis_range=[-125, -65]
                 )
 
     energy_fig.update_traces(
@@ -250,28 +280,22 @@ def create_us_map(gdff, xaxis_column_name):
         ])
     )
 
-    #energy_fig.update_layout(transition_duration=500)
-    #fig = px.scatter(dff, x=xaxis_column_name, y=yaxis_column_name)
-    #fig.update_traces(mode='lines+markers')
-    #fig.update_xaxes(showgrid=False)
-    #fig.add_annotation(x=0, y=0.85, xanchor='left', yanchor='bottom',
-    #                   xref='paper', yref='paper', showarrow=False, align='left',
-    #                   bgcolor='rgba(255, 255, 255, 0.5)', text=title)
-    #fig.update_layout(height=500, margin={'l': 20, 'b': 10, 'r': 10, 't': 10})
-
     return energy_fig
 
 @app.callback(
     dash.dependencies.Output('x-time-series', 'figure'),
     [#dash.dependencies.Input('crossfilter-indicator-scatter', 'hoverData'),
      dash.dependencies.Input('xaxis-dropdown-component', 'value'),
-     dash.dependencies.Input('crossfilter-kwh-type', 'value'),
+     dash.dependencies.Input('crossfilter-ST-column', 'value'),
+     dash.dependencies.Input('crossfilter-EV-flag', 'value'),
      #dash.dependencies.Input('crossfilter-xaxis-type', 'value')
     ])
 #def update_y_timeseries(hoverData, xaxis_column_name):
-def update_y_timeseries(xaxis_column_name, kwh_type):
+def update_geo_data(xaxis_column_name, st_cd, EV_flag ):
     #loc_name = hoverData['points'][0]['customdata']
-    gdff = geo_df[geo_df['heat_kwh_max'] == kwh_type]
+    EV_filter = geo_df['EV_flag'] == EV_flag
+    ST_filter = get_state_filter(geo_df, st_cd)
+    gdff = geo_df[EV_filter & ST_filter]
     #dff = dff[dff['Indicator Name'] == xaxis_column_name]
     #title = '<b>{}</b><br>{}'.format(loc_name, xaxis_column_name)
     return create_us_map(gdff, xaxis_column_name)
